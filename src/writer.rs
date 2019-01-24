@@ -71,6 +71,16 @@ impl<W: Write> Writer<W> {
     // Arbitrary precision numbers
     // Floating point types
 
+    pub fn write_f32(&mut self, value: f32) -> Result<()> {
+        self.inner.write_i32::<BigEndian>(4)?;
+        self.inner.write_f32::<BigEndian>(value)
+    }
+
+    pub fn write_f64(&mut self, value: f64) -> Result<()> {
+        self.inner.write_i32::<BigEndian>(8)?;
+        self.inner.write_f64::<BigEndian>(value)
+    }
+
     // Serial types
     // Character types
     // Binary data types
