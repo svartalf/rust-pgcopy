@@ -5,3 +5,4 @@ authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
 
 [dependencies]
+byteorder = "*"
