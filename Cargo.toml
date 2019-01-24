@@ -1,7 +1,28 @@
 [package]
-name = "rust-pgcopy"
-version = "0.1.0"
+name = "pgcopy"
+description = "PostgreSQL binary COPY format generator"
+version = "0.0.1"
 authors = ["svartalf <self@svartalf.info>"]
 edition = "2018"
+readme = "README.md"
+keywords = ["database", "protocol", "binary", "serialization", "serde"]
+homepage = "https://github.com/svartalf/rust-pgcopy"
+repository = "https://github.com/svartalf/rust-pgcopy.git"
+documentation = "https://docs.rs/rust-pgcopy/"
+categories = ["encoding", "database"]
+license = "MIT/Apache-2.0"
+exclude = [".travis.yml", ".gitignore"]
+
+[features]
+default = []
+with-uuid = ["uuid"]
+with-chrono = ["chrono"]
+
+# This feature is used only for testing.
+# *DO NOT* use it in a real life, always set required features manually.
+all = ["with-uuid", "with-chrono"]
 
 [dependencies]
+byteorder = "*"
+uuid = { version = "*", optional = true }
+chrono = { version = "*", optional = true }
