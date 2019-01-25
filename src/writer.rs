@@ -1,3 +1,4 @@
+use std::i32;
 use std::io::{Write, Result};
 
 use byteorder::{WriteBytesExt, BigEndian};
@@ -87,7 +88,19 @@ impl<W: Write> Writer<W> {
     }
 
     // Serial types
+
     // Character types
+    // https://github.com/postgres/postgres/blob/master/src/backend/utils/adt/varchar.c
+    pub fn write_str<T: AsRef<str>>(&mut self, value: T) -> Result<()> {
+        let str = value.as_ref();
+        debug_assert!(str.len() < i32::MAX as usize);
+
+        self.inner.write_i32::<BigEndian>(str.len() as i32)?;  // TODO: Possible value truncation
+        self.inner.write(str.as_bytes())?;
+
+        Ok(())
+    }
+
     // Binary data types
     // Date/time types
 
