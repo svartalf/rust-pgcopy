@@ -102,6 +102,16 @@ impl<W: Write> Writer<W> {
     }
 
     // Binary data types
+    pub fn write_bytes<T: AsRef<[u8]>>(&mut self, value: T) -> Result<()> {
+        let bytes = value.as_ref();
+        debug_assert!(bytes.len() < i32::MAX as usize);
+
+        self.inner.write_i32::<BigEndian>(bytes.len() as i32)?;
+        self.inner.write(bytes)?;
+
+        Ok(())
+    }
+
     // Date/time types
 
     // Boolean type
