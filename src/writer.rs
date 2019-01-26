@@ -38,6 +38,10 @@ impl<W: Write> Writer<W> {
         self.inner.write_i16::<BigEndian>(fields)
     }
 
+    pub fn write_null(&mut self) -> Result<()> {
+        self.inner.write_i32::<BigEndian>(-1)
+    }
+
     // Integer types
     // https://github.com/postgres/postgres/blob/master/src/backend/utils/adt/int.c
     // https://github.com/postgres/postgres/blob/master/src/backend/utils/adt/int8.c
