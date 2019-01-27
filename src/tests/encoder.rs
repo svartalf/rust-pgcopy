@@ -23,6 +23,71 @@ fn test_empty_copy() {
 }
 
 #[test]
+fn test_i16() {
+    let buf: Vec<u8> = vec![];
+    let mut writer = Encoder::new(buf);
+    assert!(writer.write_i16(-42).is_ok());
+
+    let expected = vec![
+        0x00, 0x00, 0x00, 0x02, 0xff, 0xd6,
+    ];
+
+    assert_eq!(&expected, writer.get_ref());
+}
+
+#[test]
+fn test_i32() {
+    let buf: Vec<u8> = vec![];
+    let mut writer = Encoder::new(buf);
+    assert!(writer.write_i32(-601).is_ok());
+
+    let expected = vec![
+        0x00, 0x00, 0x00, 0x04, 0xff, 0xff, 0xfd, 0xa7,
+    ];
+
+    assert_eq!(&expected, writer.get_ref());
+}
+
+#[test]
+fn test_i64() {
+    let buf: Vec<u8> = vec![];
+    let mut writer = Encoder::new(buf);
+    assert!(writer.write_i64(320_320).is_ok());
+
+    let expected = vec![
+        0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0xe3, 0x40,
+    ];
+
+    assert_eq!(&expected, writer.get_ref());
+}
+
+#[test]
+fn test_f32() {
+    let buf: Vec<u8> = vec![];
+    let mut writer = Encoder::new(buf);
+    assert!(writer.write_f32(3.14).is_ok());
+
+    let expected = vec![
+        0x00, 0x00, 0x00, 0x04, 0x40, 0x48, 0xf5, 0xc3,
+    ];
+
+    assert_eq!(&expected, writer.get_ref());
+}
+
+#[test]
+fn test_f64() {
+    let buf: Vec<u8> = vec![];
+    let mut writer = Encoder::new(buf);
+    assert!(writer.write_f64(3.14).is_ok());
+
+    let expected = vec![
+        0x00, 0x00, 0x00, 0x08, 0x40, 0x09, 0x1e, 0xb8, 0x51, 0xeb, 0x85, 0x1f,
+    ];
+
+    assert_eq!(&expected, writer.get_ref());
+}
+
+#[test]
 fn test_bool() {
     let buf: Vec<u8> = vec![];
     let mut writer = Encoder::new(buf);
@@ -110,6 +175,48 @@ fn test_time() {
 
     let expected = vec![
         0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x0b, 0x49, 0xbd, 0x64, 0x48
+    ];
+
+    assert_eq!(&expected, writer.get_ref());
+}
+
+#[test]
+fn test_null() {
+    let buf: Vec<u8> = vec![];
+    let mut writer = Encoder::new(buf);
+
+    assert!(writer.write_null().is_ok());
+
+    let expected = vec![
+        0xff, 0xff, 0xff, 0xff,
+    ];
+
+    assert_eq!(&expected, writer.get_ref());
+}
+
+#[test]
+fn test_str() {
+    let buf: Vec<u8> = vec![];
+    let mut writer = Encoder::new(buf);
+
+    assert!(writer.write_str("hello world").is_ok());
+
+    let expected = vec![
+        0x00, 0x00, 0x00, 0x0b, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64,
+    ];
+
+    assert_eq!(&expected, writer.get_ref());
+}
+
+#[test]
+fn test_bytes() {
+    let buf: Vec<u8> = vec![];
+    let mut writer = Encoder::new(buf);
+
+    assert!(writer.write_bytes([0xde, 0xad, 0xbe, 0xef]).is_ok());
+
+    let expected = vec![
+        0x00, 0x00, 0x00, 0x04, 0xde, 0xad, 0xbe, 0xef,
     ];
 
     assert_eq!(&expected, writer.get_ref());
