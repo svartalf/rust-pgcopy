@@ -2,7 +2,9 @@ use std::i32;
 use std::io::{Write, Result};
 
 use byteorder::{WriteBytesExt, BigEndian};
+use chrono::{NaiveDateTime, DateTime, TimeZone, Datelike, Timelike};
 use uuid::Uuid;
+
 
 #[derive(Debug)]
 pub struct Writer<W: Write> {
@@ -76,7 +78,7 @@ impl<W: Write> Writer<W> {
         self.inner.write_u64::<BigEndian>(value)
     }
 
-    // Arbitrary precision numbers
+    // TODO: Arbitrary precision numbers
 
     // Floating point types
     // https://github.com/postgres/postgres/blob/master/src/backend/utils/adt/float.c
@@ -91,7 +93,7 @@ impl<W: Write> Writer<W> {
         self.inner.write_f64::<BigEndian>(value)
     }
 
-    // Serial types
+    // TODO: Serial types
 
     // Character types
     // https://github.com/postgres/postgres/blob/master/src/backend/utils/adt/varchar.c
@@ -116,7 +118,33 @@ impl<W: Write> Writer<W> {
         Ok(())
     }
 
-    // Date/time types
+    // TODO: Date/time types
+    // Date and time (no time zone)
+    pub fn write_timestamp(&mut self, value: NaiveDateTime) -> Result<()> {
+        // Microseconds starting from the PSQL epoch (2000-01-1)
+        let us = value.timestamp_nanos() / 1_000 - 946684800;
+        self.inner.write_i32::<BigEndian>(8)?;
+        self.inner.write_i64::<BigEndian>(us)
+
+    }
+
+    // Date and time (with time zone)
+    pub fn write_timestamp_with_time_zone<Tz: TimeZone>(&mut self, value: DateTime<Tz>) -> Result<()> {
+        self.write_timestamp(value.naive_utc())
+    }
+
+    pub fn write_date<T: Datelike>(&mut self, value: T) -> Result<()> {
+        // 730_120 is a days amount from the "Day 1" to PSQL epoch date (2000-01-01)
+        // TODO: Check if this is correct calculation
+        let days = value.num_days_from_ce() - 730_120;
+
+        self.inner.write_i32::<BigEndian>(4)?;
+        self.inner.write_i32::<BigEndian>(days)
+    }
+
+    pub fn write_time<T: Timelike>(&mut self, _value: T) -> Result<()> {
+        unimplemented!()
+    }
 
     // Boolean type
     // https://github.com/postgres/postgres/blob/master/src/backend/utils/adt/bool.c
@@ -126,10 +154,10 @@ impl<W: Write> Writer<W> {
         self.inner.write_i8(value as i8)
     }
 
-    // Enumerated types
-    // Geometric types
-    // Network address types
-    // Bit String types
+    // TODO: Enumerated types
+    // TODO: Geometric types
+    // TODO: Network address types
+    // TODO: Bit String types
 
     // UUID type
     pub fn write_uuid(&mut self, value: Uuid) -> Result<()> {
@@ -139,11 +167,11 @@ impl<W: Write> Writer<W> {
         Ok(())
 
     }
-    // XML type
-    // JSON types
-    // Arrays
-    // Composite types
-    // Range types
+    // TODO: XML type
+    // TODO: JSON types
+    // TODO: Arrays
+    // TODO: Composite types
+    // TODO: Range types
 }
 
 
