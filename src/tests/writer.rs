@@ -115,7 +115,7 @@ fn test_time() {
     assert_eq!(&expected, writer.inner());
 }
 
-//#[test]
+#[test]
 fn test_complex() {
     let buf: Vec<u8> = vec![];
     let mut writer = Writer::new(buf);
@@ -156,5 +156,5 @@ fn test_complex() {
         0xff, 0xff // trailer
     ];
 
-    assert_eq!(&expected[70..], &writer.inner()[70..]);
+    assert_eq!(&expected, writer.inner());
 }
