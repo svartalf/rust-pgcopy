@@ -7,21 +7,32 @@ use uuid::Uuid;
 
 
 #[derive(Debug)]
-pub struct Writer<W: Write> {
+pub struct Encoder<W: Write> {
     inner: W,
 }
 
-impl<W: Write> Writer<W> {
-    pub fn new(writer: W) -> Writer<W> {
-        Writer {
+impl<W: Write> Encoder<W> {
+    /// Create new encoder.
+    pub fn new(writer: W) -> Encoder<W> {
+        Encoder {
             inner: writer,
         }
     }
 
-    pub fn inner(&self) -> &W {
+    /// Acquires a reference to the underlying writer.
+    pub fn get_ref(&self) -> &W {
         &self.inner
     }
 
+    /// Acquires a mutable reference to the underlying writer.
+    ///
+    /// Note that mutating the output/input state of the stream may corrupt this object,
+    /// so care must be taken when using this method.
+    pub fn get_mut(&mut self) -> &mut W {
+        &mut self.inner
+    }
+
+    /// Write binary format header.
     pub fn write_header(&mut self) -> Result<()> {
         self.inner.write_all(b"PGCOPY\n\xff\r\n\0")?;
         self.inner.write_i32::<NetworkEndian>(0)?;  // flags, empty for now
@@ -30,12 +41,14 @@ impl<W: Write> Writer<W> {
         Ok(())
     }
 
+    /// Write binary format trailer.
     pub fn write_trailer(&mut self) -> Result<()> {
         self.inner.write_i16::<NetworkEndian>(-1)
     }
 
-    // Each tuple begins with a 16-bit integer count of the number of fields in the tuple.
-    // (Presently, all tuples in a table will have the same count, but that might not always be true.)
+    /// Start a new tuple.
+    ///
+    /// Each tuple begins with a 16-bit integer count of the number of fields in the tuple.
     pub fn write_tuple(&mut self, fields: i16) -> Result<()> {
         self.inner.write_i16::<NetworkEndian>(fields)
     }

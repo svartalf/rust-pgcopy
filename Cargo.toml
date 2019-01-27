@@ -1,5 +1,5 @@
 [package]
-name = "rust-pgcopy"
+name = "pgcopy"
 description = "PostgreSQL binary COPY format generator"
 version = "0.1.0"
 authors = ["svartalf <self@svartalf.info>"]

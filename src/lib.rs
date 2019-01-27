@@ -1,6 +1,6 @@
-mod writer;
+mod encoder;
 
-pub use writer::Writer;
+pub use encoder::Encoder;
 
 #[cfg(test)]
 mod tests;
