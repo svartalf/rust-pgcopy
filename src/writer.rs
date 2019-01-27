@@ -23,7 +23,7 @@ impl<W: Write> Writer<W> {
     }
 
     pub fn write_header(&mut self) -> Result<()> {
-        self.inner.write(b"PGCOPY\n\xff\r\n\0")?;
+        self.inner.write_all(b"PGCOPY\n\xff\r\n\0")?;
         self.inner.write_i32::<BigEndian>(0)?;  // flags, empty for now
         self.inner.write_i32::<BigEndian>(0)?;  // extension area length
 
@@ -102,7 +102,7 @@ impl<W: Write> Writer<W> {
         debug_assert!(str.len() < i32::MAX as usize);
 
         self.inner.write_i32::<BigEndian>(str.len() as i32)?;  // TODO: Possible value truncation
-        self.inner.write(str.as_bytes())?;
+        self.inner.write_all(str.as_bytes())?;
 
         Ok(())
     }
@@ -113,19 +113,21 @@ impl<W: Write> Writer<W> {
         debug_assert!(bytes.len() < i32::MAX as usize);
 
         self.inner.write_i32::<BigEndian>(bytes.len() as i32)?;
-        self.inner.write(bytes)?;
+        self.inner.write_all(bytes)?;
 
         Ok(())
     }
 
-    // TODO: Date/time types
+    // Date/time types
+
     // Date and time (no time zone)
     pub fn write_timestamp(&mut self, value: NaiveDateTime) -> Result<()> {
-        // Microseconds starting from the PSQL epoch (2000-01-1)
-        let us = value.timestamp_nanos() / 1_000 - 946684800;
+        // Microseconds starting from the PSQL epoch (2000-01-01)
+        // This big number is a microseconds amount between UNIX epoch and PSQL epoch
+        let us = (value.timestamp_nanos() / 1_000) - 946_684_800_000_000;
+
         self.inner.write_i32::<BigEndian>(8)?;
         self.inner.write_i64::<BigEndian>(us)
-
     }
 
     // Date and time (with time zone)
@@ -135,15 +137,17 @@ impl<W: Write> Writer<W> {
 
     pub fn write_date<T: Datelike>(&mut self, value: T) -> Result<()> {
         // 730_120 is a days amount from the "Day 1" to PSQL epoch date (2000-01-01)
-        // TODO: Check if this is correct calculation
         let days = value.num_days_from_ce() - 730_120;
 
         self.inner.write_i32::<BigEndian>(4)?;
         self.inner.write_i32::<BigEndian>(days)
     }
 
-    pub fn write_time<T: Timelike>(&mut self, _value: T) -> Result<()> {
-        unimplemented!()
+    pub fn write_time<T: Timelike>(&mut self, value: T) -> Result<()> {
+        let us = i64::from(value.num_seconds_from_midnight()) * 1_000 * 1_000 + i64::from(value.nanosecond() / 1_000);
+
+        self.inner.write_i32::<BigEndian>(8)?;
+        self.inner.write_i64::<BigEndian>(us)
     }
 
     // Boolean type
@@ -162,7 +166,7 @@ impl<W: Write> Writer<W> {
     // UUID type
     pub fn write_uuid(&mut self, value: Uuid) -> Result<()> {
         self.inner.write_i32::<BigEndian>(16)?;
-        self.inner.write(value.as_bytes())?;
+        self.inner.write_all(value.as_bytes())?;
 
         Ok(())
 
