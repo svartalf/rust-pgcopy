@@ -2,8 +2,8 @@ use std::i32;
 use std::io::{Write, Result};
 
 use byteorder::{WriteBytesExt, NetworkEndian};
-use chrono::{NaiveDateTime, DateTime, TimeZone, Datelike, Timelike};
-use uuid::Uuid;
+
+use crate::types;
 
 
 #[derive(Debug)]
@@ -96,13 +96,7 @@ impl<W: Write> Encoder<W> {
     // Character types
     // https://github.com/postgres/postgres/blob/master/src/backend/utils/adt/varchar.c
     pub fn write_str<T: AsRef<str>>(&mut self, value: T) -> Result<()> {
-        let str = value.as_ref();
-        debug_assert!(str.len() < i32::MAX as usize);
-
-        self.inner.write_i32::<NetworkEndian>(str.len() as i32)?;  // TODO: Possible value truncation
-        self.inner.write_all(str.as_bytes())?;
-
-        Ok(())
+        self.write_bytes(value.as_ref().as_bytes())
     }
 
     // Binary data types
@@ -119,33 +113,25 @@ impl<W: Write> Encoder<W> {
     // Date/time types
 
     // Date and time (no time zone)
-    pub fn write_timestamp(&mut self, value: NaiveDateTime) -> Result<()> {
-        // Microseconds starting from the PSQL epoch (2000-01-01)
-        // This big number is a microseconds amount between UNIX epoch and PSQL epoch
-        let us = (value.timestamp_nanos() / 1_000) - 946_684_800_000_000;
-
+    pub fn write_timestamp<T: types::PgTimestamp>(&mut self, value: T) -> Result<()> {
         self.inner.write_i32::<NetworkEndian>(8)?;
-        self.inner.write_i64::<NetworkEndian>(us)
+        self.inner.write_i64::<NetworkEndian>(value.to_timestamp())
     }
 
     // Date and time (with time zone)
-    pub fn write_timestamp_with_time_zone<Tz: TimeZone>(&mut self, value: DateTime<Tz>) -> Result<()> {
-        self.write_timestamp(value.naive_utc())
-    }
-
-    pub fn write_date<T: Datelike>(&mut self, value: T) -> Result<()> {
-        // 730_120 is a days amount from the "Day 1" to PSQL epoch date (2000-01-01)
-        let days = value.num_days_from_ce() - 730_120;
-
-        self.inner.write_i32::<NetworkEndian>(4)?;
-        self.inner.write_i32::<NetworkEndian>(days)
-    }
-
-    pub fn write_time<T: Timelike>(&mut self, value: T) -> Result<()> {
-        let us = i64::from(value.num_seconds_from_midnight()) * 1_000 * 1_000 + i64::from(value.nanosecond() / 1_000);
-
+    pub fn write_timestamp_with_time_zone<T: types::PgTimestampWithTimeZone>(&mut self, value: T) -> Result<()> {
         self.inner.write_i32::<NetworkEndian>(8)?;
-        self.inner.write_i64::<NetworkEndian>(us)
+        self.inner.write_i64::<NetworkEndian>(value.to_timestamp_with_time_zone())
+    }
+
+    pub fn write_date<T: types::PgDate>(&mut self, value: T) -> Result<()> {
+        self.inner.write_i32::<NetworkEndian>(4)?;
+        self.inner.write_i32::<NetworkEndian>(value.to_date())
+    }
+
+    pub fn write_time<T: types::PgTime>(&mut self, value: T) -> Result<()> {
+        self.inner.write_i32::<NetworkEndian>(8)?;
+        self.inner.write_i64::<NetworkEndian>(value.to_time())
     }
 
     // Boolean type
@@ -162,13 +148,13 @@ impl<W: Write> Encoder<W> {
     // TODO: Bit String types
 
     // UUID type
-    pub fn write_uuid(&mut self, value: Uuid) -> Result<()> {
+    pub fn write_uuid<T: types::PgUuid>(&mut self, value: T) -> Result<()> {
         self.inner.write_i32::<NetworkEndian>(16)?;
-        self.inner.write_all(value.as_bytes())?;
+        self.inner.write_all(value.to_uuid())?;
 
         Ok(())
-
     }
+
     // TODO: XML type
     // TODO: JSON types
     // TODO: Arrays
