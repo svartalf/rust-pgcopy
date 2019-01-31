@@ -1,9 +1,9 @@
 use crate::Encoder;
 
-mod ext;
-mod numeric;
-mod chars;
-mod binary;
+//mod ext;
+//mod numeric;
+//mod chars;
+//mod binary;
 
 #[test]
 fn test_empty_copy() {
@@ -22,7 +22,4 @@ fn test_empty_copy() {
     assert_eq!(&expected, writer.get_ref());
 }
 
-assert_bool!(bool_true, true, vec![0x00, 0x00, 0x00, 0x01, 0x01]);
-assert_bool!(bool_false, false, vec![0x00, 0x00, 0x00, 0x01, 0x00]);
 
-//assert_write!(null, write_null(), vec![0xff, 0xff, 0xff, 0xff]);
