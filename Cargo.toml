@@ -10,7 +10,7 @@ homepage = "https://github.com/svartalf/rust-pgcopy"
 repository = "https://github.com/svartalf/rust-pgcopy.git"
 documentation = "https://docs.rs/rust-pgcopy/"
 categories = ["encoding", "database"]
-license = "MIT/Apache-2.0"
+license = "Apache-2.0 OR MIT"
 exclude = [".travis.yml", ".gitignore"]
 
 [features]
@@ -23,6 +23,6 @@ with-chrono = ["chrono"]
 all = ["with-uuid", "with-chrono"]
 
 [dependencies]
-byteorder = "*"
-uuid = { version = "*", optional = true }
-chrono = { version = "*", optional = true }
+byteorder = "1"
+uuid = { version = "0.7", optional = true }
+chrono = { version = "0.4", optional = true }

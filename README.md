@@ -1,7 +1,11 @@
 # pgcopy
 
+[![Latest Version](https://img.shields.io/crates/v/pgcopy.svg)](https://crates.io/crates/pgcopy) 
+
 Write data into a PostgreSQL `COPY WITH BINARY` format, somewhat faster way to insert a lot of entries into database
 that plain text or CSV.
+
+[Documentation](https://docs.rs/pgcopy)
 
 ## Supported data types
 
