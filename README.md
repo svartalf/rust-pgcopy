@@ -1,6 +1,7 @@
 # pgcopy
 
-Write data into a PostgreSQL `COPY WITH BINARY` format, fastest way to insert a lot of entries into database.
+Write data into a PostgreSQL `COPY WITH BINARY` format, somewhat faster way to insert a lot of entries into database
+that plain text or CSV.
 
 ## Supported data types
 

@@ -45,11 +45,11 @@ macro_rules! assert_bool {
         assert_write!($test_name, write_bool, $value, $expected);
     };
 }
-macro_rules! assert_numeric {
-    ($test_name:ident, $value:expr, $expected:expr) => {
-        assert_write!($test_name, write_numeric, $value, $expected);
-    };
-}
+//macro_rules! assert_numeric {
+//    ($test_name:ident, $value:expr, $expected:expr) => {
+//        assert_write!($test_name, write_numeric, $value, $expected);
+//    };
+//}
 
 // TODO:
 // assert_write!(null, write_null(), vec![0xff, 0xff, 0xff, 0xff]);
@@ -58,3 +58,7 @@ mod numeric;
 mod boolean;
 mod bytes;
 mod text;
+mod timestamp;
+mod date;
+mod time;
+mod uuid;
