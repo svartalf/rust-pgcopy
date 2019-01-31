@@ -1,5 +1,6 @@
 use std::i32;
 use std::io::{Write, Result};
+use std::cmp;
 
 use byteorder::{WriteBytesExt, NetworkEndian};
 
@@ -77,6 +78,97 @@ impl<W: Write> Encoder<W> {
     }
 
     // TODO: Arbitrary precision numbers
+//     pq_sendint16(&buf, x.ndigits);
+//     pq_sendint16(&buf, x.weight);
+//     pq_sendint16(&buf, x.sign);
+//     pq_sendint16(&buf, x.dscale);
+//     for (i = 0; i < x.ndigits; i++)
+//         pq_sendint16(&buf, x.digits[i]);
+    pub fn write_numeric<T: types::PgNumeric>(&mut self, value: Option<T>) -> Result<()> {
+        match value {
+            None => { // NaN case
+                self.inner.write_i32::<NetworkEndian>(8)?;
+                self.inner.write_i16::<NetworkEndian>(0)?; // Zero digits
+                self.inner.write_i16::<NetworkEndian>(0)?; // First digit weight
+                // PostgreSQL' C sources are using `0xc000` here, but it's overflowing for i16
+                self.inner.write_u16::<NetworkEndian>(0xc000)?; // NaN marker instead of sign
+                self.inner.write_u16::<NetworkEndian>(0) // Display scale is zero too
+            },
+            Some(val) => {
+                let exponent = val.exponent();
+                let sign = val.sign();
+                let mut raw_digits = val.digits();
+                let mut weight = 0;
+
+                for _ in 0..(exponent % 4 + 4) {
+                    raw_digits.push(0);
+                }
+                raw_digits.reverse();
+
+                let mut weight = 0;
+                let mut digits: Vec<i16> = vec![];
+                let mut offset = 0usize;
+
+                for (idx, chunk) in raw_digits.chunks(4).enumerate() {
+                    if chunk.iter().filter(|d| **d > 0).count() > 0 {
+                        break;
+                    } else {
+                        weight += 1;
+                        offset += 4;
+                    }
+                }
+
+                for (idx, chunk) in raw_digits[offset..].chunks(4).enumerate() {
+                    let mut res = 0;
+                    for (idx, digit) in chunk.iter().enumerate() {
+                        res += *digit as i16 * (10_i16.pow(idx as u32));
+                    }
+                    digits.insert(0, res);
+                }
+                println!("weight0: {}", weight);
+                println!("nte: {}", f32::floor(exponent as f32 / 4.0) as i16);
+                let ndigits = digits.len() as i16;
+                let dscale = -cmp::min(0, exponent);
+                weight += (f32::floor(exponent as f32 / 4.0) as i16) + ndigits - 1;
+
+                println!("ndigits: {:?}", ndigits);
+                println!("weight: {:?}", weight);
+                println!("sign: {:?}", sign);
+                println!("dscale: {:?}", dscale);
+                println!("exponent: {:?}", exponent);
+                println!("digits: {:?}", digits);
+
+                self.inner.write_i32::<NetworkEndian>(2 * (4 + digits.len() as i32))?;
+                self.inner.write_i16::<NetworkEndian>(digits.len() as i16)?;
+                self.inner.write_i16::<NetworkEndian>(weight)?;
+                let sign_repr = match sign {
+                    types::PgNumericSign::Positive => 0x0000,
+                    types::PgNumericSign::Negative => 0x4000,
+                };
+                self.inner.write_u16::<NetworkEndian>(sign_repr)?;
+                self.inner.write_u16::<NetworkEndian>(dscale as u16)?;
+                for digit in digits {
+                    self.inner.write_i16::<NetworkEndian>(digit);
+                }
+
+                Ok(())
+
+
+//                let length = 2 + 2 + 2 + 2 + digits.len() as i32;
+//                self.inner.write_i32::<NetworkEndian>(length)?;
+//                self.inner.write_i16::<NetworkEndian>(digits.len() as i16)?;
+//                self.inner.write_i16::<NetworkEndian>(weight)?;
+//                let sign_repr = match sign {
+//                    types::PgNumericSign::Positive => 0x0000,
+//                    types::PgNumericSign::Negative => 0x4000,
+//                };
+//                self.inner.write_i16::<NetworkEndian>(sign_repr)?;;
+//                self.inner.write_i16::<NetworkEndian>(0)?;
+//
+//                Ok(())
+            }
+        }
+    }
 
     // Floating point types
     // https://github.com/postgres/postgres/blob/master/src/backend/utils/adt/float.c
@@ -102,6 +194,7 @@ impl<W: Write> Encoder<W> {
     // Binary data types
     pub fn write_bytes<T: AsRef<[u8]>>(&mut self, value: T) -> Result<()> {
         let bytes = value.as_ref();
+        // TODO: Should panic probably
         debug_assert!(bytes.len() < i32::MAX as usize);
 
         self.inner.write_i32::<NetworkEndian>(bytes.len() as i32)?;

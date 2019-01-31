@@ -15,10 +15,14 @@ exclude = [".travis.yml", ".gitignore"]
 
 [features]
 default = []
-# This feature is used mostly for testing
-all = ["uuid", "chrono"]
+with-bigdecimal = ["bigdecimal", "num-bigint"]
+# This feature is used only for testing.
+# *DO NOT* use it in a real life, always set required features manually.
+all = ["uuid", "chrono", "with-bigdecimal"]
 
 [dependencies]
 byteorder = "*"
 uuid = { version = "*", optional = true }
 chrono = { version = "*", optional = true }
+bigdecimal = { version = "*", optional = true }
+num-bigint = { version = "^0.2", optional = true }
