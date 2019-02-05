@@ -2,6 +2,11 @@
 //! format, which is "somewhat faster than the text and CSV formats".
 
 mod encoder;
+mod serializer;
+mod writer;
+mod error;
 pub mod types;
 
 pub use encoder::Encoder;
+pub use writer::Writer;
+pub use error::{Error, ErrorKind, Result};

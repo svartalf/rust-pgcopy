@@ -1,8 +1,9 @@
 use std::i32;
-use std::io::{Write, Result};
+use std::io::{Write};
 
 use byteorder::{WriteBytesExt, NetworkEndian};
 
+use crate::Result;
 use crate::types;
 
 
@@ -73,7 +74,9 @@ impl<W> Encoder<W> where W: Write {
     ///
     /// Caller is required to invoke this method last immediately after writing tuples data.
     pub fn write_trailer(&mut self) -> Result<()> {
-        self.inner.write_i16::<NetworkEndian>(-1)
+        self.inner.write_i16::<NetworkEndian>(-1)?;
+
+        Ok(())
     }
 
     /// Starts a new tuple.
@@ -81,12 +84,16 @@ impl<W> Encoder<W> where W: Write {
     /// Each tuple begins with a signed 16-bit integer count of the number of fields in the tuple.
     /// Presently, all tuples in a table will have the same count.
     pub fn write_tuple(&mut self, fields: i16) -> Result<()> {
-        self.inner.write_i16::<NetworkEndian>(fields)
+        self.inner.write_i16::<NetworkEndian>(fields)?;
+
+        Ok(())
     }
 
     /// Writes `NULL` as a column value.
     pub fn write_null(&mut self) -> Result<()> {
-        self.inner.write_i32::<NetworkEndian>(-1)
+        self.inner.write_i32::<NetworkEndian>(-1)?;
+
+        Ok(())
     }
 
     // Numeric types
@@ -98,19 +105,25 @@ impl<W> Encoder<W> where W: Write {
     /// Writes `smallint` type value.
     pub fn write_smallint(&mut self, value: i16) -> Result<()> {
         self.inner.write_i32::<NetworkEndian>(2)?;
-        self.inner.write_i16::<NetworkEndian>(value)
+        self.inner.write_i16::<NetworkEndian>(value)?;
+
+        Ok(())
     }
 
     /// Writes `int` type value.
     pub fn write_int(&mut self, value: i32) -> Result<()> {
         self.inner.write_i32::<NetworkEndian>(4)?;
-        self.inner.write_i32::<NetworkEndian>(value)
+        self.inner.write_i32::<NetworkEndian>(value)?;
+
+        Ok(())
     }
 
     /// Writes `bigint` type value.
     pub fn write_bigint(&mut self, value: i64) -> Result<()> {
         self.inner.write_i32::<NetworkEndian>(8)?;
-        self.inner.write_i64::<NetworkEndian>(value)
+        self.inner.write_i64::<NetworkEndian>(value)?;
+
+        Ok(())
     }
 
     // Arbitrary precision numbers
@@ -125,13 +138,17 @@ impl<W> Encoder<W> where W: Write {
     /// Writes `real` type value.
     pub fn write_real(&mut self, value: f32) -> Result<()> {
         self.inner.write_i32::<NetworkEndian>(4)?;
-        self.inner.write_f32::<NetworkEndian>(value)
+        self.inner.write_f32::<NetworkEndian>(value)?;
+
+        Ok(())
     }
 
     /// Writes `double precision` type value.
     pub fn write_double(&mut self, value: f64) -> Result<()> {
         self.inner.write_i32::<NetworkEndian>(8)?;
-        self.inner.write_f64::<NetworkEndian>(value)
+        self.inner.write_f64::<NetworkEndian>(value)?;
+
+        Ok(())
     }
 
     // TODO: Monetary types
@@ -162,28 +179,36 @@ impl<W> Encoder<W> where W: Write {
     ///
     /// See [Timestamp](types/trait.Timestamp.html) type implementors for available options here.
     pub fn write_timestamp<T: types::Timestamp>(&mut self, value: T) -> Result<()> {
-        value.to_writer(&mut self.inner)
+        value.to_writer(&mut self.inner)?;
+
+        Ok(())
     }
 
     /// Writes `timestamp with time zone` type value.
     ///
     /// See [TimestampWithTimeZone](types/trait.TimestampWithTimeZone.html) type implementors for available options here.
     pub fn write_timestamp_with_time_zone<T: types::TimestampWithTimeZone>(&mut self, value: T) -> Result<()> {
-        value.to_writer(&mut self.inner)
+        value.to_writer(&mut self.inner)?;
+
+        Ok(())
     }
 
     /// Writes `date` type value.
     ///
     /// See [Date](types/trait.Date.html) type implementors for available options here.
     pub fn write_date<T: types::Date>(&mut self, value: T) -> Result<()> {
-        value.to_writer(&mut self.inner)
+        value.to_writer(&mut self.inner)?;
+
+        Ok(())
     }
 
     /// Writes `time` type value.
     ///
     /// See [Time](types/trait.Time.html) type implementors for available options here.
     pub fn write_time<T: types::Time>(&mut self, value: T) -> Result<()> {
-        value.to_writer(&mut self.inner)
+        value.to_writer(&mut self.inner)?;
+
+        Ok(())
     }
 
     #[doc(hidden)]
@@ -195,7 +220,9 @@ impl<W> Encoder<W> where W: Write {
     /// Writes `bool` type value.
     pub fn write_bool<T: Into<bool>>(&mut self, value: T) -> Result<()> {
         self.inner.write_i32::<NetworkEndian>(1)?;
-        self.inner.write_i8(value.into() as i8)
+        self.inner.write_i8(value.into() as i8)?;
+
+        Ok(())
     }
 
     // TODO: Enumerated Types
@@ -225,7 +252,9 @@ impl<W> Encoder<W> where W: Write {
     ///
     /// See [Uuid](types/trait.Uuid.html) type implementors for available options here.
     pub fn write_uuid<T: types::Uuid>(&mut self, value: T) -> Result<()> {
-        value.to_writer(&mut self.inner)
+        value.to_writer(&mut self.inner)?;
+
+        Ok(())
     }
 
     // XML Type

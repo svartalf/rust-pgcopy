@@ -8,7 +8,7 @@ readme = "README.md"
 keywords = ["database", "protocol", "binary", "serialization", "serde"]
 homepage = "https://github.com/svartalf/rust-pgcopy"
 repository = "https://github.com/svartalf/rust-pgcopy.git"
-documentation = "https://docs.rs/rust-pgcopy/"
+documentation = "https://docs.rs/pgcopy/"
 categories = ["encoding", "database"]
 license = "Apache-2.0 OR MIT"
 exclude = [".travis.yml", ".gitignore"]
@@ -24,5 +24,9 @@ all = ["with-uuid", "with-chrono"]
 
 [dependencies]
 byteorder = "1"
+serde = "1.0"
 uuid = { version = "0.7", optional = true }
 chrono = { version = "0.4", optional = true }
+
+[dev-dependencies]
+serde_derive = "1.0"
