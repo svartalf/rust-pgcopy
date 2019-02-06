@@ -55,13 +55,28 @@ pub trait Cidr {}
 #[doc(hidden)]
 pub trait Inet {}
 
-#[doc(hidden)]
-pub trait MacAddr {}
+/// Trait for `macaddr` type implementations.
+///
+/// Implementors should write:
+/// 1. signed 4 bytes of the following data length, value is required to be `6`
+/// 2. 6 bytes of the MAC address
+pub trait MacAddr {
+    fn to_writer<W: io::Write>(&self, writer: &mut W) -> io::Result<()>;
+}
+
+/// Trait for `macaddr8` type implementations.
+///
+/// Implementors should write:
+/// 1. signed 4 bytes of the following data length, value is required to be `6` or `8`
+/// 2. 6 or 8 bytes of the MAC address
+pub trait MacAddr8 {
+    fn to_writer<W: io::Write>(&self, writer: &mut W) -> io::Result<()>;
+}
 
 /// Trait for `uuid` type implementations.
 ///
 /// Implementors should write:
-/// 1. signed 4 bytes of the following data length, value is required to be `32`
+/// 1. signed 4 bytes of the following data length, value is required to be `16`
 /// 2. 16 bytes of the UUID
 pub trait Uuid {
     fn to_writer<W: io::Write>(&self, writer: &mut W) -> io::Result<()>;

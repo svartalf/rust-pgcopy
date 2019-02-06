@@ -212,9 +212,14 @@ impl<W> Encoder<W> where W: Write {
         unimplemented!()
     }
 
-    #[doc(hidden)]
-    pub fn write_macaddr<T: types::MacAddr>(&mut self, _value: T) -> Result<()> {
-        unimplemented!()
+    /// Writes `macaddr` type value.
+    pub fn write_macaddr<T: types::MacAddr>(&mut self, value: T) -> Result<()> {
+        value.to_writer(&mut self.inner)
+    }
+
+    /// Writes `macaddr8` type value.
+    pub fn write_macaddr8<T: types::MacAddr8>(&mut self, value: T) -> Result<()> {
+        value.to_writer(&mut self.inner)
     }
 
     // TODO: Bit String Types
