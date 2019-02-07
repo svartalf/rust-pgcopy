@@ -10,27 +10,32 @@ use crate::types;
 ///
 /// End users are required to manually call all necessary methods in a right order.
 ///
-/// ```rust
-/// use pgcopy::Encoder;
-///
+/// ```edition2018
+/// # use std::error::Error;
+/// # use pgcopy::Encoder;
+/// #
+/// # fn main() -> Result<(), Box<Error>> {
 /// let mut buf: Vec<u8> = vec![];
 /// let mut encoder = Encoder::new(&mut buf);
 ///
-/// encoder.write_header().unwrap();
+/// encoder.write_header()?;
 ///
-/// encoder.write_tuple(3).unwrap(); // First tuple with three columns
-/// encoder.write_smallint(1).unwrap(); // First column
-/// encoder.write_bool(false).unwrap(); // Second
-/// encoder.write_str("first").unwrap(); // Third
+/// encoder.write_tuple(3)?; // First tuple with three columns
+/// encoder.write_smallint(1)?; // First column
+/// encoder.write_bool(false)?; // Second
+/// encoder.write_str("first")?; // Third
 ///
-/// encoder.write_tuple(3).unwrap(); // Second tuple
-/// encoder.write_smallint(2).unwrap();
-/// encoder.write_bool(true).unwrap();
-/// encoder.write_str("second").unwrap();
+/// encoder.write_tuple(3)?; // Second tuple
+/// encoder.write_smallint(2)?;
+/// encoder.write_bool(true)?;
+/// encoder.write_str("second")?;
 ///
-/// encoder.write_trailer().unwrap();
+/// encoder.write_trailer()?;
 ///
 /// println!("{:?}", encoder.get_ref());
+/// #
+/// #   Ok(())
+/// # }
 /// ```
 #[derive(Debug, Clone)]
 pub struct Encoder<W: Write> {

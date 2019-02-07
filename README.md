@@ -17,7 +17,6 @@ that plain text or CSV.
 |   | numeric                  |
 | ✔ | real                     | `f32`
 | ✔ | double                   | `f64`
-|   | char                     | `char`
 | ✔ | char varying             | `&str`
 | ✔ | text                     | `&str`
 | ✔ | bytea                    | `&[u8]`
