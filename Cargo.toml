@@ -19,7 +19,7 @@ with-uuid = ["uuid"]
 with-chrono = ["chrono"]
 with-eui48 = ["eui48"]
 
-# This feature is used only for testing.
+# This feature is used only for testing and documentation building.
 # *DO NOT* use it in a real life, always set required features manually.
 all = ["with-uuid", "with-chrono", "with-eui48"]
 
@@ -28,3 +28,7 @@ byteorder = "1"
 uuid = { version = "0.7", optional = true }
 chrono = { version = "0.4", optional = true }
 eui48 = { version = "0.4", optional = true }
+
+[package.metadata.docs.rs]
+features = ["all"]
+no-default-features = true

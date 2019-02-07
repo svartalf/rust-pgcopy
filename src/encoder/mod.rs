@@ -213,11 +213,15 @@ impl<W> Encoder<W> where W: Write {
     }
 
     /// Writes `macaddr` type value.
+    ///
+    /// See [MacAddr](types/trait.MacAddr.html) type implementors for available options here.
     pub fn write_macaddr<T: types::MacAddr>(&mut self, value: T) -> Result<()> {
         value.to_writer(&mut self.inner)
     }
 
     /// Writes `macaddr8` type value.
+    ///
+    /// See [MacAddr8](types/trait.MacAddr8.html) type implementors for available options here.
     pub fn write_macaddr8<T: types::MacAddr8>(&mut self, value: T) -> Result<()> {
         value.to_writer(&mut self.inner)
     }
