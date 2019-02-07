@@ -1,11 +1,10 @@
 # pgcopy
 
-[![Latest Version](https://img.shields.io/crates/v/pgcopy.svg)](https://crates.io/crates/pgcopy) 
+[![Latest Version](https://img.shields.io/crates/v/pgcopy.svg)](https://crates.io/crates/pgcopy)
+[![Latest Version](https://docs.rs/pgcopy/badge.svg)](https://docs.rs/pgcopy)
 
 Write data into a PostgreSQL `COPY WITH BINARY` format, somewhat faster way to insert a lot of entries into database
 that plain text or CSV.
-
-[Documentation](https://docs.rs/pgcopy)
 
 ## Supported data types
 
@@ -18,7 +17,7 @@ that plain text or CSV.
 |   | numeric                  |
 | ✔ | real                     | `f32`
 | ✔ | double                   | `f64`
-| ✔ | char                     | `char`
+|   | char                     | `char`
 | ✔ | char varying             | `&str`
 | ✔ | text                     | `&str`
 | ✔ | bytea                    | `&[u8]`
@@ -30,9 +29,9 @@ that plain text or CSV.
 | ✔ | boolean                  | `bool`
 |   | cidr                     |
 |   | inet                     |
-|   | macaddr                  |
-|   | macaddr8                 |
-| ✔ | uuid                     | [uuid::Uuid](https://docs.rs/uuid/latest/uuid/struct.Uuid.html)
+| ✔ | macaddr                  | `[u8; 6]` or [eui48::MacAddress](https://docs.rs/eui48/latest/eui48/struct.MacAddress.html)
+| ✔ | macaddr8                 | `[u8; 6]`, `[u8; 8]` or [eui48::MacAddress](https://docs.rs/eui48/latest/eui48/struct.MacAddress.html)
+| ✔ | uuid                     | `[u8; 16]` or [uuid::Uuid](https://docs.rs/uuid/latest/uuid/struct.Uuid.html)
 |   | xml                      |
 |   | json                     |
 |   | jsonb                    |
